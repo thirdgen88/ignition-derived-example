@@ -1,0 +1,62 @@
+---
+x-default-logging: &default-logging
+  logging:
+    options:
+      max-size: '100m'
+      max-file: '5'
+    driver: json-file
+
+services:
+  gateway:
+    <<: [ *default-logging ]
+    build:
+      context: gw-build
+      dockerfile: Dockerfile
+      args:
+        IGNITION_VERSION: ${IGNITION_VERSION:-8.1.18}
+        SUPPLEMENTAL_MODULES: "azureiotinjector mqttengine"
+        # GATEWAY_ADMIN_USERNAME: superadmin
+      secrets:
+        - gateway-admin-password
+    # image: myimage:mytag  # uncomment to apply a custom tag to the built image
+    ports:
+      - 8088:8088
+    # volumes:  # this volumes section is commented out for easier testing
+    #   - gateway-data:/usr/local/bin/ignition/data
+    environment:
+      # Defining these below will perform a password reset, see the build above for 
+      # updating/preloading the admin username/password in the `default` user source.
+      # GATEWAY_ADMIN_USERNAME: admin
+      # GATEWAY_ADMIN_PASSWORD_FILE: /run/secrets/gateway-admin-password
+      TZ: America/Chicago
+      GATEWAY_MODULES_ENABLED: "alarm-notification,\
+        allen-bradley-drivers,\
+        bacnet-driver,\
+        dnp3-driver,\
+        enterprise-administration,\
+        logix-driver,\
+        modbus-driver-v2,\
+        omron-driver,\
+        opc-ua,\
+        perspective,\
+        reporting,\
+        serial-support-client,\
+        serial-support-gateway,\
+        sfc,\
+        siemens-drivers,\
+        sms-notification,\
+        sql-bridge,\
+        symbol-factory,\
+        tag-historian,\
+        udp-tcp-drivers,\
+        vision,\
+        voice-notification,\
+        web-browser,\
+        web-developer"
+    command: >
+      -n Ignition-base
+      -m 1024
+
+secrets:
+  gateway-admin-password:
+    file: gw-secrets/GATEWAY_ADMIN_PASSWORD
