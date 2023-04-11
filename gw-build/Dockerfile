@@ -1,22 +1,25 @@
-# syntax=docker/dockerfile:1.4
+# syntax=docker/dockerfile:1.5
 ARG IGNITION_VERSION=${IGNITION_VERSION}
 FROM inductiveautomation/ignition:${IGNITION_VERSION} as prep
+
+# Temporarily become root for system-level updates (required for 8.1.26+)
+USER root
 
 # Install some prerequisite packages
 RUN apt-get update && apt-get install -y wget ca-certificates jq zip unzip sqlite3
 
-ARG SUPPLEMENTAL_AZUREIOTINJECTOR_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.11/Azure-Injector-signed.modl"
-ARG SUPPLEMENTAL_AZUREIOTINJECTOR_DOWNLOAD_SHA256="17babfcc28386262b5b67c5d7109dd4e0c346461d7a9add7f086fddd952574c0"
-ARG SUPPLEMENTAL_MQTTTRANSMISSION_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.11/MQTT-Transmission-signed.modl"
-ARG SUPPLEMENTAL_MQTTTRANSMISSION_DOWNLOAD_SHA256="15e6b7f548dc909ffba1af44527e494e918192295835390f2e921a93f243ca07"
+ARG SUPPLEMENTAL_AZUREIOTINJECTOR_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.15/Azure-Injector-signed.modl"
+ARG SUPPLEMENTAL_AZUREIOTINJECTOR_DOWNLOAD_SHA256="e952629cebaad75825cf6e57c09c01f5f1772065a6e87cc0cda45fdca4b29f13"
+ARG SUPPLEMENTAL_MQTTTRANSMISSION_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.15/MQTT-Transmission-signed.modl"
+ARG SUPPLEMENTAL_MQTTTRANSMISSION_DOWNLOAD_SHA256="1e1e7428cba02dce6e579e6c82e4b8ad30d892438a7504aa0481eff7a5f87952"
 ARG SUPPLEMENTAL_MQTTTRANSMISSIONNIGHTLY_DOWNLOAD_URL="https://ignition-modules-nightly.s3.amazonaws.com/Ignition8/MQTT-Transmission-signed.modl"
 ARG SUPPLEMENTAL_MQTTTRANSMISSIONNIGHTLY_DOWNLOAD_SHA256="notused"
-ARG SUPPLEMENTAL_MQTTENGINE_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.11/MQTT-Engine-signed.modl"
-ARG SUPPLEMENTAL_MQTTENGINE_DOWNLOAD_SHA256="bebfdab4f423b5ffa40b3e4114781145dadd0eadb3500f48ca904365a838e0c9"
+ARG SUPPLEMENTAL_MQTTENGINE_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.15/MQTT-Engine-signed.modl"
+ARG SUPPLEMENTAL_MQTTENGINE_DOWNLOAD_SHA256="5693c22b391e6da31351f2bb9245ad65e96dff9d02c0a322cb70eb11a2fb86b6"
 ARG SUPPLEMENTAL_MQTTENGINENIGHTLY_DOWNLOAD_URL="https://ignition-modules-nightly.s3.amazonaws.com/Ignition8/MQTT-Engine-signed.modl"
 ARG SUPPLEMENTAL_MQTTENGINENIGHTLY_DOWNLOAD_SHA256="notused"
-ARG SUPPLEMENTAL_MQTTDISTRIBUTOR_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.11/MQTT-Distributor-signed.modl"
-ARG SUPPLEMENTAL_MQTTDISTRIBUTOR_DOWNLOAD_SHA256="a27fdf7b2e9ca74e4eac571283aae0829cefbe4c19776506cd2b092d543175e2"
+ARG SUPPLEMENTAL_MQTTDISTRIBUTOR_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.15/MQTT-Distributor-signed.modl"
+ARG SUPPLEMENTAL_MQTTDISTRIBUTOR_DOWNLOAD_SHA256="5c81be13a9f749899825a99a109502c1eb28be940d060301a1ddf9967d488f9e"
 ARG SUPPLEMENTAL_MQTTDISTRIBUTORNIGHTLY_DOWNLOAD_URL="https://ignition-modules-nightly.s3.amazonaws.com/Ignition8/MQTT-Distributor-signed.modl"
 ARG SUPPLEMENTAL_MQTTDISTRIBUTORNIGHTLY_DOWNLOAD_SHA256="notused"
 ARG SUPPLEMENTAL_MODULES
@@ -58,6 +61,9 @@ RUN --mount=type=secret,id=gateway-admin-password \
 # Final Image
 FROM inductiveautomation/ignition:${IGNITION_VERSION} as final
 
+# Temporarily become root for system-level updates (required for 8.1.26+)
+USER root
+
 # Add supplemental packages, such as git if needed/desired
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -65,9 +71,12 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Embed modules and base gwbk from prep image as well as entrypoint shim
-COPY --from=prep /root/*.modl ${IGNITION_INSTALL_LOCATION}/user-lib/modules/
-COPY --from=prep /root/base.gwbk ${IGNITION_INSTALL_LOCATION}/base.gwbk
-COPY --chmod=0755 docker-entrypoint-shim.sh /usr/local/bin/
+COPY --from=prep --chown=ignition:ignition /root/*.modl ${IGNITION_INSTALL_LOCATION}/user-lib/modules/
+COPY --from=prep --chown=ignition:ignition /root/base.gwbk ${IGNITION_INSTALL_LOCATION}/base.gwbk
+COPY --chmod=0755 --chown=root:root docker-entrypoint-shim.sh /usr/local/bin/
+
+# Return to ignition user
+USER ignition
 
 # Supplement other default environment variables
 ENV ACCEPT_IGNITION_EULA=Y \

@@ -23,7 +23,7 @@ If you want to build the image with `docker build`, you can use something like t
 
 ```
 docker build \
-    --build-arg IGNITION_VERSION=8.1.18 \
+    --build-arg IGNITION_VERSION=8.1.26 \
     --build-arg SUPPLEMENTAL_MODULES="azureiotinjector mqttengine" \
     --secret id=gateway-admin-password,src=gw-secrets/GATEWAY_ADMIN_PASSWORD \
     -t myimage:mytag \
