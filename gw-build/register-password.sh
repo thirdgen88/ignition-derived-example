@@ -2,6 +2,9 @@
 set -euo pipefail
 shopt -s inherit_errexit
 
+# Global variables
+declare -u AUTH_SALT
+
 ###############################################################################
 # Update an Ignition SQLite Configuration DB with a baseline username/password
 # ----------------------------------------------------------------------------
@@ -28,7 +31,12 @@ function register_password() {
   echo "Registering Admin Password with Configuration DB"
 
   # Generate Salted PW Hash
-  password_hash=$(generate_salted_hash "$(<"${SECRET_LOCATION}")")
+  if [[ "${password_input}" =~ ^\[[0-9A-F]{8,}][0-9a-f]{64}$ ]]; then
+    debug "Password is already hashed"
+    password_hash="$(< "${SECRET_LOCATION}")"
+  else
+    password_hash=$(generate_salted_hash "$(<"${SECRET_LOCATION}")")
+  fi
 
   # Update INTERNALUSERTABLE
   echo "  Setting default admin user to USERNAME='${GATEWAY_ADMIN_USERNAME}' and PASSWORD='${password_hash}'"
@@ -39,17 +47,15 @@ function register_password() {
 # Processes password input and translates to salted hash
 ###############################################################################
 function generate_salted_hash() {
-  local -u auth_salt
   local auth_pwhash auth_pwsalthash auth_password password_input
   password_input="${1}"
   
-  auth_salt=$(date +%s | sha256sum | head -c 8)
-  debug "auth_salt is ${auth_salt}"
+  debug "auth_salt is ${AUTH_SALT}"
   auth_pwhash=$(printf %s "${password_input}" | sha256sum - | cut -c -64)
   debug "auth_pwhash is ${auth_pwhash}"
-  auth_pwsalthash=$(printf %s "${password_input}${auth_salt}" | sha256sum - | cut -c -64)
+  auth_pwsalthash=$(printf %s "${password_input}${AUTH_SALT}" | sha256sum - | cut -c -64)
   debug "auth_pwsalthash is ${auth_pwsalthash}"
-  auth_password="[${auth_salt}]${auth_pwsalthash}"
+  auth_password="[${AUTH_SALT}]${auth_pwsalthash}"
 
   echo "${auth_password}"
 }
@@ -68,11 +74,15 @@ function debug() {
 # Print usage information
 ###############################################################################
 function usage() {
-  >&2 echo "Usage: $0 -u <string> -f <path/to/file> -d <path/to/db>"
+  >&2 echo "Usage: $0 -u <string> -f <path/to/file> -d <path/to/db> [...]"
+  >&2 echo "  -u <string>        Gateway Admin Username"
+  >&2 echo "  -f <path/to/file>  Path to secret file containing password or salted hash"
+  >&2 echo "  -d <path/to/db>    Path to Ignition Configuration DB"
+  >&2 echo "  -s <salt method>   Salt method, either 'timestamp' or 'random' (default)"
 }
 
 # Argument Processing
-while getopts ":hvu:f:d:" opt; do
+while getopts ":hvu:f:d:s:" opt; do
   case "$opt" in
   v)
     verbose=1
@@ -86,6 +96,22 @@ while getopts ":hvu:f:d:" opt; do
   d)
     DB_LOCATION="${OPTARG}"
     DB_FILE=$(basename "${DB_LOCATION}")
+    ;;
+  s)
+    # Compute AUTH_SALT based on timestamp or random
+    case "${OPTARG}" in
+      timestamp)
+        AUTH_SALT=$(date +%s | sha256sum | head -c 8)
+        ;;
+      random)
+        # no-op, default will be set below
+        ;;
+      *)
+        usage
+        echo "Invalid salt method: ${OPTARG}" >&2
+        exit 1
+        ;;
+    esac
     ;;
   h)
     usage
@@ -107,9 +133,15 @@ done
 # shift positional args based on number consumed by getopts
 shift $((OPTIND-1))
 
+# Check for required defaults
 if [ -z "${GATEWAY_ADMIN_USERNAME:-}" ] || [ -z "${SECRET_LOCATION:-}" ] || [ -z "${DB_LOCATION:-}" ]; then
   usage
   exit 1
+fi
+
+# set defaults for unset optional args
+if [[ -z ${AUTH_SALT+x} ]]; then
+  AUTH_SALT=$(od -An -v -t x1 -N 4 /dev/random | tr -d ' ')
 fi
 
 main
