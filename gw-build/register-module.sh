@@ -6,15 +6,15 @@ shopt -s inherit_errexit
 # Performs auto-acceptance of EULA and import of certificates for third-party modules
 ###############################################################################
 function main() {
-    if [ ! -f "${MODULE_LOCATION}" ]; then
-        echo ""
-        return 0  # Silently exit if there is no /modules path
-    elif [ ! -f "${DB_LOCATION}" ]; then
-        echo "WARNING: ${DB_FILE} not found, skipping module registration"
-        return 0
-    fi
+  if [ ! -f "${MODULE_LOCATION}" ]; then
+    echo ""
+    return 0  # Silently exit if there is no /modules path
+  elif [ ! -f "${DB_LOCATION}" ]; then
+    echo "WARNING: ${DB_FILE} not found, skipping module registration"
+    return 0
+  fi
 
-    register_module
+  register_module
 }
 
 ###############################################################################
@@ -41,23 +41,28 @@ function register_module() {
     next_certificates_id=$( "${SQLITE3[@]}" "SELECT COALESCE(MAX(CERTIFICATES_ID)+1,1) FROM CERTIFICATES" ) 
     thumbprint_already_exists=$( "${SQLITE3[@]}" "SELECT 1 FROM CERTIFICATES WHERE lower(hex(THUMBPRINT)) = '${thumbprint}'" )
     if [ "${thumbprint_already_exists}" != "1" ]; then
-        echo " Accepting Certificate as CERTIFICATES_ID=${next_certificates_id}"
-        "${SQLITE3[@]}" "INSERT INTO CERTIFICATES (CERTIFICATES_ID, THUMBPRINT, SUBJECTNAME) VALUES (${next_certificates_id}, x'${thumbprint}', '${subject_name}'); UPDATE SEQUENCES SET val=${next_certificates_id} WHERE name='CERTIFICATES_SEQ'"
+      echo " Accepting Certificate as CERTIFICATES_ID=${next_certificates_id}"
+      "${SQLITE3[@]}" "INSERT INTO CERTIFICATES (CERTIFICATES_ID, THUMBPRINT, SUBJECTNAME) VALUES (${next_certificates_id}, x'${thumbprint}', '${subject_name}'); UPDATE SEQUENCES SET val=${next_certificates_id} WHERE name='CERTIFICATES_SEQ'"
     else
-        echo " Thumbprint already found in CERTIFICATES table, skipping INSERT"
+      echo " Thumbprint already found in CERTIFICATES table, skipping INSERT"
     fi
 
     # Populate EULAS table
-    local next_eulas_id license_crc32 module_id module_id_already_exists
+    local next_eulas_id license_crc32 module_id
+    local -i module_id_check
     next_eulas_id=$( "${SQLITE3[@]}" "SELECT COALESCE(MAX(EULAS_ID)+1,1) FROM EULAS" ) 
     license_crc32=$( unzip -qq -c "${module_sourcepath}" license.html | gzip -c | tail -c8 | od -t u4 -N 4 -A n | cut -c 2- ) 
     module_id=$( unzip -qq -c "${module_sourcepath}" module.xml | grep -oP '(?<=<id>).*(?=</id)' )
-    module_id_already_exists=$( "${SQLITE3[@]}" "SELECT 1 FROM EULAS WHERE MODULEID='${module_id}' AND CRC=${license_crc32}" )
-    if [ "${module_id_already_exists}" != "1" ]; then
-        echo " Accepting License on your behalf as EULAS_ID=${next_eulas_id}"
-        "${SQLITE3[@]}" "INSERT INTO EULAS (EULAS_ID, MODULEID, CRC) VALUES (${next_eulas_id}, '${module_id}', ${license_crc32}); UPDATE SEQUENCES SET val=${next_eulas_id} WHERE name='EULAS_SEQ'"
+    module_id_check=$( "${SQLITE3[@]}" "SELECT CASE WHEN CRC=${license_crc32} THEN -1 ELSE 1 END FROM EULAS WHERE MODULEID='${module_id}'" )
+    if (( module_id_check == 1 )); then
+      echo " Removing previous EULAS entries for MODULEID='${module_id}'"
+      "${SQLITE3[@]}" "DELETE FROM EULAS WHERE MODULEID='${module_id}'"
+    fi
+    if (( module_id_check >= 0 )); then
+      echo " Accepting License on your behalf as EULAS_ID=${next_eulas_id}"
+      "${SQLITE3[@]}" "INSERT INTO EULAS (EULAS_ID, MODULEID, CRC) VALUES (${next_eulas_id}, '${module_id}', ${license_crc32}); UPDATE SEQUENCES SET val=${next_eulas_id} WHERE name='EULAS_SEQ'"
     else
-        echo " License EULA already found in EULAS table, skipping INSERT"
+      echo " License EULA already found in EULAS table, skipping INSERT"
     fi
 }
 

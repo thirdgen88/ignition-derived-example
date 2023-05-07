@@ -13,7 +13,7 @@ services:
       context: gw-build
       dockerfile: Dockerfile
       args:
-        IGNITION_VERSION: ${IGNITION_VERSION:-8.1.26}
+        IGNITION_VERSION: ${IGNITION_VERSION:-8.1.27}
         SUPPLEMENTAL_MODULES: "azureiotinjector mqttengine"
         # GATEWAY_ADMIN_USERNAME: superadmin
       secrets:
@@ -34,6 +34,7 @@ services:
         bacnet-driver,\
         dnp3-driver,\
         enterprise-administration,\
+        iec-61850-driver,\
         logix-driver,\
         modbus-driver-v2,\
         omron-driver,\

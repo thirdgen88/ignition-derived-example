@@ -6,30 +6,30 @@ shopt -s inherit_errexit
 # Retrieves third-party modules and verifies their checksums
 ###############################################################################
 function main() {
-    if [ -z "${SUPPLEMENTAL_MODULES}" ]; then
-        return 0  # Silently exit if there are no supplemental modules to target
-    fi
+  if [ -z "${SUPPLEMENTAL_MODULES}" ]; then
+    return 0  # Silently exit if there are no supplemental modules to target
+  fi
 
-    retrieve_modules
+  retrieve_modules
 }
 
 ###############################################################################
 # Download the modules
 ###############################################################################
 function retrieve_modules() {
-    IFS=', ' read -r -a module_install_key_arr <<< "${SUPPLEMENTAL_MODULES}"
-    for module_install_key in "${module_install_key_arr[@]}"; do
-        download_url_env="SUPPLEMENTAL_${module_install_key^^}_DOWNLOAD_URL"
-        download_sha256_env="SUPPLEMENTAL_${module_install_key^^}_DOWNLOAD_SHA256"
-        if [ -n "${!download_url_env:-}" ] && [ -n "${!download_sha256_env:-}" ]; then
-            download_basename=$(basename "${!download_url_env}")
-            wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt --referer https://inductiveautomation.com/* "${!download_url_env}" && \
-                [[ "notused" == "${!download_sha256_env}" ]] || echo "${!download_sha256_env}" "${download_basename}" | sha256sum -c -
-        else
-            echo "Error finding specified module ${module_install_key} in build args, aborting..."
-            exit 1
-        fi
-    done  
+  IFS=', ' read -r -a module_install_key_arr <<< "${SUPPLEMENTAL_MODULES}"
+  for module_install_key in "${module_install_key_arr[@]}"; do
+    download_url_env="SUPPLEMENTAL_${module_install_key^^}_DOWNLOAD_URL"
+    download_sha256_env="SUPPLEMENTAL_${module_install_key^^}_DOWNLOAD_SHA256"
+    if [ -n "${!download_url_env:-}" ] && [ -n "${!download_sha256_env:-}" ]; then
+      download_basename=$(basename "${!download_url_env}")
+      wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt --referer https://inductiveautomation.com/* "${!download_url_env}" && \
+        [[ "notused" == "${!download_sha256_env}" ]] || echo "${!download_sha256_env}" "${download_basename}" | sha256sum -c -
+    else
+      echo "Error finding specified module ${module_install_key} in build args, aborting..."
+      exit 1
+    fi
+  done
 }
 
 ###############################################################################
