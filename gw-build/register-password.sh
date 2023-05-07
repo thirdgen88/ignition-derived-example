@@ -26,14 +26,15 @@ function main() {
 # Updates the target Config DB with the target username and salted pw hash
 ###############################################################################
 function register_password() {
-  local SQLITE3=( sqlite3 "${DB_LOCATION}" ) password_hash
+  local SQLITE3=( sqlite3 "${DB_LOCATION}" ) password_hash password_input
 
   echo "Registering Admin Password with Configuration DB"
 
   # Generate Salted PW Hash
+  password_input="$(< "${SECRET_LOCATION}")"
   if [[ "${password_input}" =~ ^\[[0-9A-F]{8,}][0-9a-f]{64}$ ]]; then
     debug "Password is already hashed"
-    password_hash="$(< "${SECRET_LOCATION}")"
+    password_hash="${password_input}"
   else
     password_hash=$(generate_salted_hash "$(<"${SECRET_LOCATION}")")
   fi
