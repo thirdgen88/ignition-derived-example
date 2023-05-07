@@ -9,11 +9,11 @@ shopt -s inherit_errexit
 ###############################################################################
 function main() {
   if [ ! -f "${SECRET_LOCATION}" ]; then
-      echo ""
-      return 0  # Silently exit if there is no secret at target path
+    echo ""
+    return 0  # Silently exit if there is no secret at target path
   elif [ ! -f "${DB_LOCATION}" ]; then
-      echo "WARNING: ${DB_FILE} not found, skipping password registration"
-      return 0
+    echo "WARNING: ${DB_FILE} not found, skipping password registration"
+    return 0
   fi
 
   register_password
