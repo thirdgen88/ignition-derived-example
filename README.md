@@ -17,7 +17,7 @@ There is a `docker-compose.yml` solution that can be used to build the image.  Y
 docker compose up --build -d
 ```
 
-Note that the resultant gateway that will launch at http://localhost:8088 does not have a volume associated with it in order to assist with rapid testing of changes.
+> **Warning** <br/> The resultant gateway that will launch at http://localhost:8088 does **not** have a volume associated with it in order to assist with rapid testing of changes. Please add a volume definition to persist your gateway state data if you use this solution outside of testing the derived image build!
 
 If you want to build the image with `docker build`, you can use something like the command below:
 
