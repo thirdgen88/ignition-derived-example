@@ -8,25 +8,26 @@ USER root
 # Install some prerequisite packages
 RUN apt-get update && apt-get install -y wget ca-certificates jq zip unzip sqlite3
 
-ARG SUPPLEMENTAL_AZUREIOTINJECTOR_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.20/Azure-Injector-signed.modl"
-ARG SUPPLEMENTAL_AZUREIOTINJECTOR_DOWNLOAD_SHA256="61449e97512e0476995bc13f832525f61173b66326d1f4b1ef1a2eb7300f6780"
-ARG SUPPLEMENTAL_AWSINJECTOR_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.20/AWS-Injector-signed.modl"
-ARG SUPPLEMENTAL_AWSINJECTOR_DOWNLOAD_SHA256="31966268e6641cb4f8a48688111c4c81d463374db7ca59a6eb57a86a3b3494fa"
-ARG SUPPLEMENTAL_GOOGLECLOUDINJECTOR_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.20/Google-Cloud-Injector-signed.modl"
-ARG SUPPLEMENTAL_GOOGLECLOUDINJECTOR_DOWNLOAD_SHA256="945386ca6c529a1489b876258128b1cf62ebce8d91816c2656e3cc2c78f8d36b"
-ARG SUPPLEMENTAL_MQTTTRANSMISSION_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.20/MQTT-Transmission-signed.modl"
-ARG SUPPLEMENTAL_MQTTTRANSMISSION_DOWNLOAD_SHA256="7023c677496f93e51b1cfc9e8c93d7fa77181cf82c0dcd6aa31f2c9732200e01"
+ARG SUPPLEMENTAL_AWSINJECTOR_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.21/AWS-Injector-signed.modl"
+ARG SUPPLEMENTAL_AWSINJECTOR_DOWNLOAD_SHA256="387f5a806df6a9cae2cbcd02181f3062ad613516e50b0ca6d2708f63f0eda46c"
+ARG SUPPLEMENTAL_AZUREIOTINJECTOR_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.21/Azure-Injector-signed.modl"
+ARG SUPPLEMENTAL_AZUREIOTINJECTOR_DOWNLOAD_SHA256="6f42ea9c7966f0907f56c254f4dd85919077db8b321013e26924ed881c82b19f"
+ARG SUPPLEMENTAL_GCPINJECTOR_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.21/Google-Cloud-Injector-signed.modl"
+ARG SUPPLEMENTAL_GCPINJECTOR_DOWNLOAD_SHA256="5f022db3afa48a2528daaa7d0c3baa9ee7a1bb2bf25f0553b93ba88864342201"
+ARG SUPPLEMENTAL_MQTTTRANSMISSION_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.21/MQTT-Transmission-signed.modl"
+ARG SUPPLEMENTAL_MQTTTRANSMISSION_DOWNLOAD_SHA256="6daf806339f62fc3383fca377533deeeb28d8693842e23d7dc03ea0082bc0c16"
 ARG SUPPLEMENTAL_MQTTTRANSMISSIONNIGHTLY_DOWNLOAD_URL="https://ignition-modules-nightly.s3.amazonaws.com/Ignition8/MQTT-Transmission-signed.modl"
 ARG SUPPLEMENTAL_MQTTTRANSMISSIONNIGHTLY_DOWNLOAD_SHA256="notused"
-ARG SUPPLEMENTAL_MQTTENGINE_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.20/MQTT-Engine-signed.modl"
-ARG SUPPLEMENTAL_MQTTENGINE_DOWNLOAD_SHA256="e3b5956ad2d7746462dc1997e672d8d3d2789d0852f52aad7849170f7a85d5df"
+ARG SUPPLEMENTAL_MQTTENGINE_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.21/MQTT-Engine-signed.modl"
+ARG SUPPLEMENTAL_MQTTENGINE_DOWNLOAD_SHA256="e4fb06f96da56f3cf97029c3cbd864c1d91e1ba6677b4241a699804bf33b722c"
 ARG SUPPLEMENTAL_MQTTENGINENIGHTLY_DOWNLOAD_URL="https://ignition-modules-nightly.s3.amazonaws.com/Ignition8/MQTT-Engine-signed.modl"
 ARG SUPPLEMENTAL_MQTTENGINENIGHTLY_DOWNLOAD_SHA256="notused"
-ARG SUPPLEMENTAL_MQTTDISTRIBUTOR_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.20/MQTT-Distributor-signed.modl"
-ARG SUPPLEMENTAL_MQTTDISTRIBUTOR_DOWNLOAD_SHA256="ad97fbb810a62688fc128aee482a414de94aea98817a19110aa5172404b5fbb3"
+ARG SUPPLEMENTAL_MQTTDISTRIBUTOR_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.21/MQTT-Distributor-signed.modl"
+ARG SUPPLEMENTAL_MQTTDISTRIBUTOR_DOWNLOAD_SHA256="210c75ab4a7bfaa0d10f8750a497d427904028db6f4fc1a9ba50a8b1fc8936fe"
 ARG SUPPLEMENTAL_MQTTDISTRIBUTORNIGHTLY_DOWNLOAD_URL="https://ignition-modules-nightly.s3.amazonaws.com/Ignition8/MQTT-Distributor-signed.modl"
 ARG SUPPLEMENTAL_MQTTDISTRIBUTORNIGHTLY_DOWNLOAD_SHA256="notused"
 ARG SUPPLEMENTAL_MODULES
+
 
 # Set working directory for this prep image and ensure that exits from sub-shells bubble up and report an error
 WORKDIR /root
