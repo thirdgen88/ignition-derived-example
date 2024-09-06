@@ -13,7 +13,7 @@ services:
       context: gw-build
       dockerfile: Dockerfile
       args:
-        IGNITION_VERSION: ${IGNITION_VERSION:-8.1.37}
+        IGNITION_VERSION: ${IGNITION_VERSION:-8.1.43}
         SUPPLEMENTAL_MODULES: "azureiotinjector mqttengine"
         # GATEWAY_ADMIN_USERNAME: superadmin
       secrets:
