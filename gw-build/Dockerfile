@@ -1,6 +1,6 @@
-# syntax=docker/dockerfile:1.5
-ARG IGNITION_VERSION=${IGNITION_VERSION}
-FROM inductiveautomation/ignition:${IGNITION_VERSION} as prep
+# syntax=docker/dockerfile:1.14
+ARG IGNITION_VERSION
+FROM inductiveautomation/ignition:${IGNITION_VERSION:-latest} AS prep
 
 # Temporarily become root for system-level updates (required for 8.1.26+)
 USER root
@@ -64,7 +64,7 @@ RUN --mount=type=secret,id=gateway-admin-password \
     fi
 
 # Final Image
-FROM inductiveautomation/ignition:${IGNITION_VERSION} as final
+FROM inductiveautomation/ignition:${IGNITION_VERSION:-latest} AS final
 
 # Temporarily become root for system-level updates (required for 8.1.26+)
 USER root
