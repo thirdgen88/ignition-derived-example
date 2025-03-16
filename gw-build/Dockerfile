@@ -1,6 +1,6 @@
-# syntax=docker/dockerfile:1.5
-ARG IGNITION_VERSION=${IGNITION_VERSION}
-FROM inductiveautomation/ignition:${IGNITION_VERSION} as prep
+# syntax=docker/dockerfile:1.14
+ARG IGNITION_VERSION
+FROM inductiveautomation/ignition:${IGNITION_VERSION:-latest} AS prep
 
 # Temporarily become root for system-level updates (required for 8.1.26+)
 USER root
@@ -8,22 +8,22 @@ USER root
 # Install some prerequisite packages
 RUN apt-get update && apt-get install -y wget ca-certificates jq zip unzip sqlite3
 
-ARG SUPPLEMENTAL_AWSINJECTOR_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.22/AWS-Injector-signed.modl"
-ARG SUPPLEMENTAL_AWSINJECTOR_DOWNLOAD_SHA256="110b4794c6e046f065635c04fb28504724feb7e6eca8f80f1b493212eb9bc09d"
-ARG SUPPLEMENTAL_AZUREIOTINJECTOR_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.22/Azure-Injector-signed.modl"
-ARG SUPPLEMENTAL_AZUREIOTINJECTOR_DOWNLOAD_SHA256="1eeb29aac155738433eb570c1a622f019fa9053d2dc88fa5a18586f1d5516ef3"
-ARG SUPPLEMENTAL_GCPINJECTOR_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.22/Google-Cloud-Injector-signed.modl"
-ARG SUPPLEMENTAL_GCPINJECTOR_DOWNLOAD_SHA256="16817e8ce58c27f53cb2aa511add1d91b3df2a9f4fd2608c9732acee0f267026"
-ARG SUPPLEMENTAL_MQTTTRANSMISSION_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.22/MQTT-Transmission-signed.modl"
-ARG SUPPLEMENTAL_MQTTTRANSMISSION_DOWNLOAD_SHA256="0c223f44e687ca03a2eb64854895bca93f4535f8bdc709995d309c8df53f1aa3"
+ARG SUPPLEMENTAL_AWSINJECTOR_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.26/AWS-Injector-signed.modl"
+ARG SUPPLEMENTAL_AWSINJECTOR_DOWNLOAD_SHA256="f3f3be84c3a4972a2c711382fe0780fcfc3acf152207b90ab7ab95fccff1a623"
+ARG SUPPLEMENTAL_AZUREIOTINJECTOR_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.26/Azure-Injector-signed.modl"
+ARG SUPPLEMENTAL_AZUREIOTINJECTOR_DOWNLOAD_SHA256="dfbbab663aba90a29f382efc216341a953f12ec68e23882ec0d13c8c8e9fb054"
+ARG SUPPLEMENTAL_GCPINJECTOR_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.26/Google-Cloud-Injector-signed.modl"
+ARG SUPPLEMENTAL_GCPINJECTOR_DOWNLOAD_SHA256="43071699bc309395dadd2c124ad0e4172ee6c79b9cc7e93c3f88224f7dc97dac"
+ARG SUPPLEMENTAL_MQTTTRANSMISSION_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.26/MQTT-Transmission-signed.modl"
+ARG SUPPLEMENTAL_MQTTTRANSMISSION_DOWNLOAD_SHA256="fdf8ae733ec5a82218977e7b20bc2afda0423adfd1a127ae8c21ce27bf5bc6c7"
 ARG SUPPLEMENTAL_MQTTTRANSMISSIONNIGHTLY_DOWNLOAD_URL="https://ignition-modules-nightly.s3.amazonaws.com/Ignition8/MQTT-Transmission-signed.modl"
 ARG SUPPLEMENTAL_MQTTTRANSMISSIONNIGHTLY_DOWNLOAD_SHA256="notused"
-ARG SUPPLEMENTAL_MQTTENGINE_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.22/MQTT-Engine-signed.modl"
-ARG SUPPLEMENTAL_MQTTENGINE_DOWNLOAD_SHA256="affc55e4e3b011eb44cdf63f864307f03b6fb28a7c8c53e886394d517caa21e5"
+ARG SUPPLEMENTAL_MQTTENGINE_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.26/MQTT-Engine-signed.modl"
+ARG SUPPLEMENTAL_MQTTENGINE_DOWNLOAD_SHA256="f6ef3c575b9b6aa04deebeb040b27b734629908c25369fb4ff1e26a00d37f098"
 ARG SUPPLEMENTAL_MQTTENGINENIGHTLY_DOWNLOAD_URL="https://ignition-modules-nightly.s3.amazonaws.com/Ignition8/MQTT-Engine-signed.modl"
 ARG SUPPLEMENTAL_MQTTENGINENIGHTLY_DOWNLOAD_SHA256="notused"
-ARG SUPPLEMENTAL_MQTTDISTRIBUTOR_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.22/MQTT-Distributor-signed.modl"
-ARG SUPPLEMENTAL_MQTTDISTRIBUTOR_DOWNLOAD_SHA256="4485d06f1a44745de80dd9facb63d2286784f643192ca25b19a3a77eb61e71e8"
+ARG SUPPLEMENTAL_MQTTDISTRIBUTOR_DOWNLOAD_URL="https://files.inductiveautomation.com/third-party/cirrus-link/4.0.26/MQTT-Distributor-signed.modl"
+ARG SUPPLEMENTAL_MQTTDISTRIBUTOR_DOWNLOAD_SHA256="7d1e3ed9700228b8d41b3b7730bc7e058f0be4ddbaeb6d635b4c196355c44e34"
 ARG SUPPLEMENTAL_MQTTDISTRIBUTORNIGHTLY_DOWNLOAD_URL="https://ignition-modules-nightly.s3.amazonaws.com/Ignition8/MQTT-Distributor-signed.modl"
 ARG SUPPLEMENTAL_MQTTDISTRIBUTORNIGHTLY_DOWNLOAD_SHA256="notused"
 ARG SUPPLEMENTAL_MODULES
@@ -64,7 +64,7 @@ RUN --mount=type=secret,id=gateway-admin-password \
     fi
 
 # Final Image
-FROM inductiveautomation/ignition:${IGNITION_VERSION} as final
+FROM inductiveautomation/ignition:${IGNITION_VERSION:-latest} AS final
 
 # Temporarily become root for system-level updates (required for 8.1.26+)
 USER root
